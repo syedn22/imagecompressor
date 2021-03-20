@@ -1,21 +1,38 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View, Image } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import imageToRgbaMatrix from "image-to-rgba-matrix";
+
+import AppButton from "./app/components/AppButton";
+import Screen from "./app/components/Screen";
 
 export default function App() {
+  const [imageUri, setimageUri] = useState();
+
+  const requestPermission = async () => {
+    const { granted } = await ImagePicker.requestCameraPermissionsAsync();
+    if (!granted) alert("You need to enable permission to access the library");
+  };
+
+  useEffect(() => {
+    requestPermission();
+  }, []);
+
+  const selectImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync();
+      if (!result.cancelled) setimageUri(result.uri);
+      imageToRgbaMatrix(result.uri).then(console.log);
+      //  let canvas = window.createI
+    } catch (error) {
+      console.log("Error opening the library.");
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Screen>
+      <AppButton title="Select Image" onPress={selectImage} />
+      <Image source={{ uri: imageUri }} style={{ width: 200, height: 200 }} />
+    </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
